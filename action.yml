@@ -1,0 +1,43 @@
+name: 'Text Encoding Guard'
+description: 'Detect and fix Chinese text encoding mojibake caused by AI coding assistants'
+branding:
+  icon: 'shield'
+  color: 'blue'
+inputs:
+  root:
+    description: 'Root directory to scan'
+    required: false
+    default: '.'
+  fix-gbk:
+    description: 'Attempt auto GBK→UTF-8 fix (creates .bak files)'
+    required: false
+    default: 'false'
+  ext:
+    description: 'Extra file extensions (comma-separated, e.g. .sql,.cfg)'
+    required: false
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    - name: Scan for encoding corruption
+      run: |
+        EXT_ARGS=""
+        if [ -n "${{ inputs.ext }}" ]; then
+          IFS=',' read -ra EXTS <<< "${{ inputs.ext }}"
+          for ext in "${EXTS[@]}"; do
+            EXT_ARGS="$EXT_ARGS --ext $ext"
+          done
+        fi
+        FIX_FLAG=""
+        if [ "${{ inputs.fix-gbk }}" = "true" ]; then
+          FIX_FLAG="--fix-gbk"
+        fi
+        python ${{ github.action_path }}/scripts/check_mojibake.py \
+          --root ${{ inputs.root }} \
+          $FIX_FLAG \
+          $EXT_ARGS \
+          --fail-on-find
+      shell: bash

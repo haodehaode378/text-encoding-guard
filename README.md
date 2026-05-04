@@ -84,9 +84,9 @@ python check_mojibake.py --root ./src --json
 python check_mojibake.py --root . --fail-on-find
 ```
 
-### CI 集成
+### CI 集成（GitHub Actions）
 
-创建 `.github/workflows/encoding-check.yml`，PR 有乱码自动拦截：
+**一行搞定：**
 
 ```yaml
 name: Encoding Guard
@@ -96,12 +96,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - name: Check for encoding corruption
-        run: python check_mojibake.py --root . --fail-on-find
+      - uses: haodehaode378/text-encoding-guard@v1
 ```
+
+PR 有乱码自动拦截，不需要写任何 Python 命令。
+
+**可选参数：**
+
+```yaml
+- uses: haodehaode378/text-encoding-guard@v1
+  with:
+    root: './src'              # 扫描目录（默认 .）
+    fix-gbk: 'true'            # 自动修复（默认 false）
+    ext: '.sql,.cfg'           # 额外扩展名
+```
+
+也可以不用 Action，直接跑脚本：
+
+<details>
+<summary>手动配置方式（点击展开）</summary>
+
+```yaml
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: "3.x"
+- run: python scripts/check_mojibake.py --root . --fail-on-find
+```
+
+</details>
 
 ### AI 助手集成
 
@@ -215,9 +238,9 @@ python check_mojibake.py --root ./src --json
 python check_mojibake.py --root . --fail-on-find
 ```
 
-### CI Integration
+### CI Integration (GitHub Actions)
 
-Create `.github/workflows/encoding-check.yml`:
+**One line:**
 
 ```yaml
 name: Encoding Guard
@@ -227,12 +250,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - name: Check for encoding corruption
-        run: python check_mojibake.py --root . --fail-on-find
+      - uses: haodehaode378/text-encoding-guard@v1
 ```
+
+PRs with mojibake fail automatically. No Python commands needed.
+
+**Optional parameters:**
+
+```yaml
+- uses: haodehaode378/text-encoding-guard@v1
+  with:
+    root: './src'              # scan directory (default .)
+    fix-gbk: 'true'            # auto-fix (default false)
+    ext: '.sql,.cfg'           # extra extensions
+```
+
+<details>
+<summary>Manual setup (click to expand)</summary>
+
+```yaml
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: "3.x"
+- run: python scripts/check_mojibake.py --root . --fail-on-find
+```
+
+</details>
 
 ### AI Agent Integration
 

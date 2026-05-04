@@ -1,8 +1,9 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -24,6 +25,20 @@ MOJIBAKE_TOKENS = [
 ]
 
 BAD_TAG_RE = re.compile(r"\?/([A-Za-z][\w-]*)>")
+
+# --- ANSI color support ---
+_NO_COLOR = os.environ.get("NO_COLOR") is not None or not sys.stdout.isatty()
+
+
+def _c(code: str) -> str:
+    return "" if _NO_COLOR else f"\033[{code}m"
+
+
+C_RED = _c("31")
+C_GREEN = _c("32")
+C_YELLOW = _c("33")
+C_BOLD = _c("1")
+C_RESET = _c("0")
 
 
 @dataclass
@@ -153,21 +168,22 @@ def main() -> int:
     else:
         safe_print(f"[encoding-guard] root={root}")
         if fixed:
-            safe_print("[fixed]")
+            safe_print(f"{C_GREEN}{C_BOLD}[fixed]{C_RESET}")
             for p in fixed:
-                safe_print(f"- {p}")
+                safe_print(f"  {C_GREEN}+ {p}{C_RESET}")
         if decode_errors:
-            safe_print("[decode-errors]")
+            safe_print(f"{C_YELLOW}[decode-errors]{C_RESET}")
             for p in decode_errors:
-                safe_print(f"- {p}")
+                safe_print(f"  {C_YELLOW}! {p}{C_RESET}")
         if findings:
-            safe_print(f"[suspicious] {len(findings)} files")
+            safe_print(f"{C_RED}{C_BOLD}[suspicious] {len(findings)} files{C_RESET}")
             for f in findings[:50]:
-                safe_print(f"- {f.path} (score={f.score}; {', '.join(f.reasons)})")
+                color = C_RED if f.score >= 20 else C_YELLOW
+                safe_print(f"  {color}- {f.path} (score={f.score}; {', '.join(f.reasons)}){C_RESET}")
                 for line in f.preview:
-                    safe_print(f"    {line}")
+                    safe_print(f"      {line}")
         else:
-            safe_print("[ok] no suspicious mojibake patterns found")
+            safe_print(f"{C_GREEN}{C_BOLD}[ok] no suspicious mojibake patterns found{C_RESET}")
 
     if args.fail_on_find and findings:
         return 2
