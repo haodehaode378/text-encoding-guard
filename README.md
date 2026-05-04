@@ -45,13 +45,17 @@
 | Copilot 生成中文文档 | 中 | README/CHANGELOG 变天书 |
 | CI/CD 自动化脚本处理中文文件 | 中 | 静默损坏，上线后才发现 |
 
-### 三大检测维度
+### 七大检测维度
 
-| 检测信号 | 权重 | 说明 |
-|----------|------|------|
-| Unicode 替换字符 `�` | +12/个 | 解码彻底失败，铁定乱码 |
-| 损坏的 HTML 闭合标签 (`?/div>`) | +10/个 | 尖括号 `<` 被吞，页面结构崩塌 |
-| 已知乱码字符 token | +2/个 | 鐢ㄦ埛、鏁版嵁、绛� 等 18 个典型乱码码点 |
+| 乱码类型 | 产生原因 | 检测信号 | 权重 |
+|----------|----------|----------|------|
+| 口字码 | UTF-8 读 GBK | Unicode 替换字符 `�` | +12/个 |
+| 破标签 | AI 编辑吞尖括号 | 损坏的 HTML 闭合标签 (`?/div>`) | +10/个 |
+| 古文码 | GBK 读 UTF-8 | 18 个已知乱码码点（鐢ㄦ埛、鏁版嵁 等） | +2/个 |
+| 锟拷码 | UTF-8→GBK→UTF-8 双重转换 | `锟斤拷` 模式匹配 | +8/次 |
+| 烫屯码 | VC 调试未初始化内存 | `烫烫烫`/`屯屯屯` 重复模式 | +6/次 |
+| 问句码 | GBK→UTF-8→GBK 双重转换 | 中文后奇数个 `?` | +8/次 |
+| 符号码 | ISO8859-1 读 UTF-8/GBK | 拉丁扩展字符（ç、æ、é 等）密集出现 | +2/个 |
 
 文件总分 > 0 即标记为可疑。分数越高，乱码越严重。
 
@@ -315,11 +319,15 @@ cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 
 ### How It Works
 
-| Signal | Weight | Description |
-|--------|--------|-------------|
-| Unicode replacement char `�` | +12 | Decoding failure |
-| Broken HTML end tags (`?/div>`) | +10 | Angle bracket corruption |
-| Known mojibake tokens | +2/char | 18 specific codepoints from UTF-8/GBK misread |
+| Mojibake Type | Cause | Detection | Weight |
+|---------------|-------|-----------|--------|
+| Box chars (口字码) | UTF-8 read as GBK | Unicode replacement `�` | +12/each |
+| Broken tags | AI swallows `<` | Malformed end tags (`?/div>`) | +10/each |
+| Ancient text (古文码) | GBK read as UTF-8 | 18 known mojibake codepoints | +2/each |
+| Kun-Kao (锟拷码) | UTF-8→GBK→UTF-8 | `锟斤拷` pattern | +8/match |
+| Tang-Tun (烫屯码) | VC debug memory | `烫烫烫`/`屯屯屯` repeats | +6/match |
+| Question code (问句码) | Double conversion | Odd `?` after CJK text | +8/match |
+| Symbol code (符号码) | ISO8859-1 read as UTF-8 | Latin diacritics (ç, æ, é) | +2/each |
 
 ### CLI Reference
 
