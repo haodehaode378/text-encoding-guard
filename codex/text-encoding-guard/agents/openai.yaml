@@ -1,0 +1,4 @@
+interface:
+  display_name: "Text Encoding Guard"
+  short_description: "Detect and fix mojibake after edits"
+  default_prompt: "After code edits, run encoding scan and fix mojibake before final response."
