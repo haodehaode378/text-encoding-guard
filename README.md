@@ -151,7 +151,7 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/check_mojibake.py --root ."
+            "command": "python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root ."
           }
         ]
       }
@@ -301,7 +301,7 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/check_mojibake.py --root ."
+            "command": "python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root ."
           }
         ]
       }

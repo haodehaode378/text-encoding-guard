@@ -5,7 +5,7 @@ Use this instruction whenever edits may touch Chinese text, markdown documentati
 After edits, run:
 
 ```bash
-python scripts/check_mojibake.py --root <project_root>
+python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root <project_root>
 ```
 
 If suspicious files are found:

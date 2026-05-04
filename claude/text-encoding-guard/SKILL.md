@@ -17,6 +17,6 @@ Prevent and repair Chinese text encoding corruption after edits.
 
 ## Commands
 ```bash
-python scripts/check_mojibake.py --root <project_root>
-python scripts/check_mojibake.py --root <project_root> --fix-gbk
+python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root <project_root>
+python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root <project_root> --fix-gbk
 ```

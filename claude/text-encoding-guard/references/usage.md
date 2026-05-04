@@ -19,7 +19,7 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
         "hooks": [
           {
             "type": "command",
-            "command": "python scripts/check_mojibake.py --root ."
+            "command": "python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root ."
           }
         ]
       }
@@ -34,10 +34,10 @@ Claude will now automatically scan for encoding corruption after every `Edit` or
 
 ```bash
 # Scan only
-python scripts/check_mojibake.py --root <project_root>
+python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root <project_root>
 
 # Auto-fix (creates .bak files first)
-python scripts/check_mojibake.py --root <project_root> --fix-gbk
+python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root <project_root> --fix-gbk
 ```
 
 ## How It Works

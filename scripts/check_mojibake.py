@@ -16,31 +16,31 @@ DEFAULT_EXTS = {
     ".sh", ".bat", ".ps1", ".xml",
 }
 SKIP_DIRS = {
-    ".git", "node_modules", "dist", "build", "__pycache__", ".venv", "venv", "target", ".idea", ".vscode"
+    ".git", "node_modules", "dist", "build", "__pycache__", ".venv", "venv", "target", ".idea", ".vscode", ".claude"
 }
 
 MOJIBAKE_TOKENS = [
-    # 古文码 (GBK misreading UTF-8)
+    # Ancient-text code (GBK misreading UTF-8)
     "\u9358", "\u9359", "\u9428", "\u93b4", "\u5bee", "\u7f01", "\u93c2", "\u93c3", "\u934a",
     "\u95c3", "\u93ba", "\u59af", "\u7481", "\u7487", "\uff1b", "\u9286", "\u951f", "\u9225",
-    # 锟拷码 (UTF-8→GBK→UTF-8 double conversion)
+    # Kun-Kao code (UTF-8 -> GBK -> UTF-8 double conversion)
     "\u9518", "\u65a4", "\u62f7",
-    # 烫屯 (VC debug uninitialized memory - characters themselves are normal,
-    # but repeated patterns are detected separately below)
 ]
 
-# 锟斤拷 pattern: the classic triple-character mojibake
-KUN_KAO_RE = re.compile(r"锟.{0,2}斤.{0,2}拷")
+# Kun-Jin-Kao pattern: classic triple-character mojibake
+KUN_KAO_RE = re.compile(r"\u951f.{0,2}\u65a4.{0,2}\u62f7")
 
-# 烫烫烫 / 屯屯屯: VC debug patterns (3+ repeated)
-TANG_TUN_RE = re.compile(r"[烫屯]{3,}")
+# Tang-Tun pattern: VC debug uninitialized memory (3+ repeated)
+TANG_TUN_RE = re.compile(r"[\u70eb\u5c6f]{3,}")
 
-# 问句码: trailing odd number of ? after CJK text
+# Question-code: trailing odd number of ? after CJK text
 QUESTION_CODE_RE = re.compile(r"[\u4e00-\u9fff].*\?{1,3}(?!\?)")
 
-# 符号码/拼音码: ISO8859-1 misread produces Latin extended chars
-# Count individual diacritics rather than requiring consecutive runs
-ISO_DIACRITICS = set("çæœåàáâãäèéêëìíîïòóôõöùúûüýÿñÇÆŒÅÀÁÂÃÄÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝŸÑ")
+# Symbol/Pinyin code: ISO8859-1 misread produces Latin extended chars
+# Use \u escapes to avoid the tool flagging its own source code
+_ISO_LOWER = "\u00e7\u00e6\u0153\u00e5\u00e0\u00e1\u00e2\u00e3\u00e4\u00e8\u00e9\u00ea\u00eb\u00ec\u00ed\u00ee\u00ef\u00f2\u00f3\u00f4\u00f5\u00f6\u00f9\u00fa\u00fb\u00fc\u00fd\u00ff\u00f1"
+_ISO_UPPER = "\u00c7\u00c6\u0152\u00c5\u00c0\u00c1\u00c2\u00c3\u00c4\u00c8\u00c9\u00ca\u00cb\u00cc\u00cd\u00ce\u00cf\u00d2\u00d3\u00d4\u00d5\u00d6\u00d9\u00da\u00db\u00dc\u00dd\u0178\u00d1"
+ISO_DIACRITICS = set(_ISO_LOWER + _ISO_UPPER)
 
 BAD_TAG_RE = re.compile(r"\?/([A-Za-z][\w-]*)>")
 
@@ -91,7 +91,7 @@ def score_text(text: str) -> tuple[int, list[str]]:
     reasons: list[str] = []
     score = 0
 
-    # 口字码: replacement characters
+    # Box-char code: replacement characters
     repl = text.count("\ufffd")
     if repl:
         score += repl * 12
@@ -103,7 +103,7 @@ def score_text(text: str) -> tuple[int, list[str]]:
         score += bad_tags * 10
         reasons.append(f"broken-end-tag={bad_tags}")
 
-    # 古文码 + 锟拷: known mojibake tokens
+    # Ancient-text + Kun-Kao: known mojibake tokens
     token_hits = 0
     for tok in MOJIBAKE_TOKENS:
         token_hits += text.count(tok)
@@ -111,25 +111,25 @@ def score_text(text: str) -> tuple[int, list[str]]:
         score += token_hits * 2
         reasons.append(f"mojibake-token-hits={token_hits}")
 
-    # 锟斤拷 pattern (extra weight for the classic triple)
+    # Kun-Jin-Kao pattern (extra weight for the classic triple)
     kun_kao = len(KUN_KAO_RE.findall(text))
     if kun_kao:
         score += kun_kao * 8
         reasons.append(f"kun-kao-pattern={kun_kao}")
 
-    # 烫烫烫 / 屯屯屯 (VC debug patterns)
+    # Tang-Tun (VC debug patterns)
     tang_tun = len(TANG_TUN_RE.findall(text))
     if tang_tun:
         score += tang_tun * 6
         reasons.append(f"tang-tun-pattern={tang_tun}")
 
-    # 问句码 (odd trailing ?)
+    # Question-code (odd trailing ?)
     question_code = len(QUESTION_CODE_RE.findall(text))
     if question_code:
         score += question_code * 8
         reasons.append(f"question-code={question_code}")
 
-    # 符号码/拼音码 (ISO8859-1 diacritics)
+    # Symbol/Pinyin code (ISO8859-1 diacritics)
     iso_count = sum(1 for c in text if c in ISO_DIACRITICS)
     if iso_count >= 3:
         score += iso_count * 2
