@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-text-encoding-guard"
+version = "1.0.0"
+description = "Detect and repair Chinese text encoding corruption (mojibake) caused by AI coding assistants"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "haodehaode378" }]
+keywords = [
+    "mojibake", "encoding", "utf-8", "gbk", "chinese",
+    "ai", "code-quality", "lint", "unicode", "claude-code",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Text Processing :: General",
+]
+
+[project.scripts]
+check-mojibake = "check_mojibake.core:main"
+
+[project.urls]
+Homepage = "https://github.com/haodehaode378/ai-text-encoding-guard"
+Repository = "https://github.com/haodehaode378/ai-text-encoding-guard"
+Issues = "https://github.com/haodehaode378/ai-text-encoding-guard/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/check_mojibake"]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "pytest-cov>=4"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

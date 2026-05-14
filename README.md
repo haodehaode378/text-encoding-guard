@@ -54,7 +54,7 @@
 | 古文码 | GBK 读 UTF-8 | 18 个已知乱码码点（鐢ㄦ埛、鏁版嵁 等） | +2/个 |
 | 锟拷码 | UTF-8→GBK→UTF-8 双重转换 | `锟斤拷` 模式匹配 | +8/次 |
 | 烫屯码 | VC 调试未初始化内存 | `烫烫烫`/`屯屯屯` 重复模式 | +6/次 |
-| 问句码 | GBK→UTF-8→GBK 双重转换 | 中文后奇数个 `?` | +8/次 |
+| 问句码 | 双重转换 | 中文后连续 `??` | +8/次 |
 | 符号码 | ISO8859-1 读 UTF-8/GBK | 拉丁扩展字符（ç、æ、é 等）密集出现 | +2/个 |
 
 文件总分 > 0 即标记为可疑。分数越高，乱码越严重。
@@ -72,20 +72,35 @@
 任一失败 → 跳过，标记为需人工检查
 ```
 
+### 安装
+
+```bash
+# 从 PyPI 安装
+pip install ai-text-encoding-guard
+
+# 或从源码安装
+git clone https://github.com/haodehaode378/text-encoding-guard.git
+cd text-encoding-guard
+pip install -e ".[test]"
+```
+
 ### 快速开始
 
 ```bash
 # 1. 扫描项目
-python check_mojibake.py --root ./src
+check-mojibake --root ./src
 
 # 2. 看到可疑文件？自动修复
-python check_mojibake.py --root ./src --fix-gbk
+check-mojibake --root ./src --fix-gbk
 
 # 3. JSON 输出，方便程序处理
-python check_mojibake.py --root ./src --json
+check-mojibake --root ./src --json
 
 # 4. CI 卡点：有乱码就失败
-python check_mojibake.py --root . --fail-on-find
+check-mojibake --root . --fail-on-find
+
+# 不安装直接用
+python scripts/check_mojibake.py --root ./src
 ```
 
 ### CI 集成（GitHub Actions）
@@ -125,7 +140,8 @@ PR 有乱码自动拦截，不需要写任何 Python 命令。
 - uses: actions/setup-python@v5
   with:
     python-version: "3.x"
-- run: python scripts/check_mojibake.py --root . --fail-on-find
+- run: pip install ai-text-encoding-guard
+- run: check-mojibake --root . --fail-on-find
 ```
 
 </details>
@@ -138,7 +154,7 @@ PR 有乱码自动拦截，不需要写任何 Python 命令。
 
 **Step 1** — 复制 skill：
 ```bash
-cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
+cp -r .claude/skills/text-encoding-guard/ /path/to/project/.claude/skills/text-encoding-guard/
 ```
 
 **Step 2** — 在 `.claude/settings.json` 添加 hook：
@@ -151,7 +167,7 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root ."
+            "command": "check-mojibake --root ."
           }
         ]
       }
@@ -162,13 +178,6 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
 
 效果：Claude 每次调用 `Edit` 或 `Write` 后，自动运行乱码检查。发现可疑文件会在工具输出中提示，Claude 会自动处理。
 
-#### OpenAI Codex
-
-```bash
-cp codex/text-encoding-guard/SKILL.md .codex/SKILL.md
-cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
-```
-
 ### CLI 完整参数
 
 | 参数 | 说明 | 示例 |
@@ -176,8 +185,10 @@ cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 | `--root PATH` | 要扫描的根目录（必填） | `--root ./src` |
 | `--json` | JSON 格式输出 | `--json` |
 | `--fail-on-find` | 发现可疑文件时退出码 2（CI 用） | `--fail-on-find` |
-| `--fix-gbk` | 尝试自动 GBK→UTF-8 修复 | `--fix-gbk` |
+| `--fix-gbk` | 尝试自动 GBK<->UTF-8 修复 | `--fix-gbk` |
 | `--ext` | 添加额外扩展名（可多次） | `--ext .sql --ext .cfg` |
+| `--verbose, -v` | 输出详细诊断信息 | `--verbose` |
+| `--quiet, -q` | 静默模式，只输出错误 | `--quiet` |
 
 ### 扫描范围
 
@@ -185,7 +196,7 @@ cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 `.py` `.md` `.txt` `.json` `.yaml` `.yml` `.toml` `.ini` `.js` `.ts` `.tsx` `.jsx` `.vue` `.html` `.css` `.scss` `.sh` `.bat` `.ps1` `.xml`
 
 **自动跳过：**
-`.git` `node_modules` `dist` `build` `__pycache__` `.venv` `venv` `target` `.idea` `.vscode`
+`.git` `node_modules` `dist` `build` `__pycache__` `.venv` `venv` `target` `.idea` `.vscode` `.claude`
 
 ### 为什么选这个
 
@@ -226,20 +237,26 @@ Broken HTML tags are also caught:
 </div>
 ```
 
+### Installation
+
+```bash
+pip install ai-text-encoding-guard
+```
+
 ### Quick Start
 
 ```bash
 # Scan a project
-python check_mojibake.py --root ./src
+check-mojibake --root ./src
 
 # Auto-fix clear UTF-8/GBK corruption (creates .bak files)
-python check_mojibake.py --root ./src --fix-gbk
+check-mojibake --root ./src --fix-gbk
 
 # JSON output for CI integration
-python check_mojibake.py --root ./src --json
+check-mojibake --root ./src --json
 
 # CI gate: fail on findings
-python check_mojibake.py --root . --fail-on-find
+check-mojibake --root . --fail-on-find
 ```
 
 ### CI Integration (GitHub Actions)
@@ -277,7 +294,8 @@ PRs with mojibake fail automatically. No Python commands needed.
 - uses: actions/setup-python@v5
   with:
     python-version: "3.x"
-- run: python scripts/check_mojibake.py --root . --fail-on-find
+- run: pip install ai-text-encoding-guard
+- run: check-mojibake --root . --fail-on-find
 ```
 
 </details>
@@ -288,7 +306,7 @@ PRs with mojibake fail automatically. No Python commands needed.
 
 1. Copy the skill:
 ```bash
-cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
+cp -r .claude/skills/text-encoding-guard/ /path/to/project/.claude/skills/text-encoding-guard/
 ```
 
 2. Add a hook to `.claude/settings.json`:
@@ -301,20 +319,13 @@ cp -r claude/text-encoding-guard/ .claude/skills/text-encoding-guard/
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/skills/text-encoding-guard/scripts/check_mojibake.py --root ."
+            "command": "check-mojibake --root ."
           }
         ]
       }
     ]
   }
 }
-```
-
-#### OpenAI Codex
-
-```bash
-cp codex/text-encoding-guard/SKILL.md .codex/SKILL.md
-cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 ```
 
 ### How It Works
@@ -326,7 +337,7 @@ cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 | Ancient text (古文码) | GBK read as UTF-8 | 18 known mojibake codepoints | +2/each |
 | Kun-Kao (锟拷码) | UTF-8→GBK→UTF-8 | `锟斤拷` pattern | +8/match |
 | Tang-Tun (烫屯码) | VC debug memory | `烫烫烫`/`屯屯屯` repeats | +6/match |
-| Question code (问句码) | Double conversion | Odd `?` after CJK text | +8/match |
+| Question code (问句码) | Double conversion | Consecutive `??` after CJK | +8/match |
 | Symbol code (符号码) | ISO8859-1 read as UTF-8 | Latin diacritics (ç, æ, é) | +2/each |
 
 ### CLI Reference
@@ -336,11 +347,13 @@ cp codex/text-encoding-guard/agents/openai.yaml .codex/agents/openai.yaml
 | `--root PATH` | Root directory to scan (required) | `--root ./src` |
 | `--json` | JSON output | `--json` |
 | `--fail-on-find` | Exit code 2 on findings (for CI) | `--fail-on-find` |
-| `--fix-gbk` | Attempt GBK→UTF-8 auto-recovery | `--fix-gbk` |
+| `--fix-gbk` | Attempt GBK<->UTF-8 auto-recovery | `--fix-gbk` |
 | `--ext` | Extra extensions (repeatable) | `--ext .sql --ext .cfg` |
+| `--verbose, -v` | Print extra diagnostic info | `--verbose` |
+| `--quiet, -q` | Suppress non-essential output | `--quiet` |
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)

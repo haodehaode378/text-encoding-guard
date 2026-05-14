@@ -35,8 +35,8 @@ runs:
         if [ "${{ inputs.fix-gbk }}" = "true" ]; then
           FIX_FLAG="--fix-gbk"
         fi
-        python ${{ github.action_path }}/scripts/check_mojibake.py \
-          --root ${{ inputs.root }} \
+        python "${{ github.action_path }}/scripts/check_mojibake.py" \
+          --root "${{ inputs.root }}" \
           $FIX_FLAG \
           $EXT_ARGS \
           --fail-on-find

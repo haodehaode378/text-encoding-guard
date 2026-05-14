@@ -1,7 +1,10 @@
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
 *.bak.mojibake
 .venv/
 venv/
+dist/
+.pytest_cache/
 .claude/
