@@ -6,7 +6,7 @@
 >
 > AI agents corrupting your Chinese text? Detect it, fix it, ship it.
 
-[![CI](https://github.com/haodehaode378/ai-text-encoding-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/haodehaode378/ai-text-encoding-guard/actions/workflows/ci.yml)
+[![CI](https://github.com/haodehaode378/text-encoding-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/haodehaode378/text-encoding-guard/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/ai-text-encoding-guard)](https://pypi.org/project/ai-text-encoding-guard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -58,8 +58,8 @@ pip install ai-text-encoding-guard
 或从源码安装：
 
 ```bash
-git clone https://github.com/haodehaode378/ai-text-encoding-guard.git
-cd ai-text-encoding-guard
+git clone https://github.com/haodehaode378/text-encoding-guard.git
+cd text-encoding-guard
 pip install -e ".[test]"
 ```
 

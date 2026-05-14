@@ -33,9 +33,9 @@ classifiers = [
 check-mojibake = "check_mojibake.core:main"
 
 [project.urls]
-Homepage = "https://github.com/haodehaode378/ai-text-encoding-guard"
-Repository = "https://github.com/haodehaode378/ai-text-encoding-guard"
-Issues = "https://github.com/haodehaode378/ai-text-encoding-guard/issues"
+Homepage = "https://github.com/haodehaode378/text-encoding-guard"
+Repository = "https://github.com/haodehaode378/text-encoding-guard"
+Issues = "https://github.com/haodehaode378/text-encoding-guard/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/check_mojibake"]
