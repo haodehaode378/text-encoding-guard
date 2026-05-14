@@ -28,7 +28,7 @@ runs:
         if [ -n "${{ inputs.ext }}" ]; then
           IFS=',' read -ra EXTS <<< "${{ inputs.ext }}"
           for ext in "${EXTS[@]}"; do
-            EXT_ARGS="$EXT_ARGS --ext $ext"
+            EXT_ARGS="$EXT_ARGS --ext \"$ext\""
           done
         fi
         FIX_FLAG=""
