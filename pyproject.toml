@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "ai-text-encoding-guard"
 version = "1.0.0"
-description = "Detect and repair Chinese text encoding corruption (mojibake) caused by AI coding assistants"
+description = "检测并修复 AI 编码助手导致的中文乱码（mojibake）| Detect and repair Chinese text encoding corruption caused by AI coding assistants"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
