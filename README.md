@@ -1,7 +1,7 @@
 # AI Text Encoding Guard
 
 <p align="center">
-  <img src="docs/images/hero-banner.png" alt="AI Text Encoding Guard — Detect & Fix Chinese Mojibake" width="100%">
+  <img src="docs/images/hero-banner-v2.png" alt="AI Text Encoding Guard - Detect and fix Chinese mojibake" width="100%">
 </p>
 
 <p align="center">
