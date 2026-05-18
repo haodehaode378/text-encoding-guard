@@ -235,10 +235,6 @@ pytest --cov=src/check_mojibake --cov-report=term-missing
 
 **AI agents corrupting your Chinese text? Detect it, fix it, ship it.**
 
-<p align="center">
-  <img src="docs/images/workflow.png" alt="Workflow: Detect → Analyze → Fix → Protect" width="100%">
-</p>
-
 ## The Problem
 
 When AI coding assistants (Claude, Cursor, Copilot, Codex) edit files with Chinese text, encoding corruption silently creeps in. UTF-8 bytes get misread as GBK — and you don't notice until users see garbage.
