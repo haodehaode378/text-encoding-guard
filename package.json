@@ -1,0 +1,31 @@
+{
+  "name": "ai-text-encoding-guard",
+  "version": "1.0.0",
+  "description": "Detect and fix Chinese text encoding mojibake caused by AI coding assistants",
+  "bin": {
+    "check-mojibake": "./bin/cli.js",
+    "ai-text-encoding-guard": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "src/check_mojibake/",
+    "!src/check_mojibake/__pycache__/",
+    "LICENSE",
+    "README.md"
+  ],
+  "keywords": [
+    "mojibake",
+    "encoding",
+    "utf-8",
+    "gbk",
+    "chinese",
+    "ai",
+    "code-quality",
+    "lint"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haodehaode378/text-encoding-guard"
+  }
+}

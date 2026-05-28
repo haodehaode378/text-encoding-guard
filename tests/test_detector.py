@@ -1,8 +1,11 @@
 """Tests for text-encoding-guard core detection logic."""
 from __future__ import annotations
 
-import pytest
+import shutil
+import tempfile
 from pathlib import Path
+
+import pytest
 from check_mojibake.core import (
     score_text,
     _line_has_mojibake,
@@ -208,12 +211,6 @@ class TestPreviewLines:
 
 # ---------------------------------------------------------------------------
 # iter_files
-# ---------------------------------------------------------------------------
-
-import tempfile
-import shutil
-
-
 @pytest.fixture()
 def tmp_dir():
     """Create a temp directory (works around Windows pytest-asyncio issues)."""
