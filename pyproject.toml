@@ -47,6 +47,10 @@ test = ["pytest>=7", "pytest-cov>=4"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-v --tb=short --cov=check_mojibake --cov-report=term-missing --cov-fail-under=80"
+# pytest-asyncio may be present in the environment even though this project has
+# no async tests. Pin the fixture loop scope so it stops emitting an unset-scope
+# deprecation warning.
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 omit = ["src/check_mojibake/__main__.py"]

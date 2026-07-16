@@ -12,7 +12,7 @@ from check_mojibake.core import main
 
 @pytest.fixture()
 def tmp_dir():
-    """Create a temporary directory that works on Windows with pytest-asyncio."""
+    """Create a temporary directory, cleaned up after the test."""
     d = Path(tempfile.mkdtemp(prefix="teg_test_"))
     yield d
     shutil.rmtree(d, ignore_errors=True)

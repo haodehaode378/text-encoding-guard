@@ -213,7 +213,7 @@ class TestPreviewLines:
 # iter_files
 @pytest.fixture()
 def tmp_dir():
-    """Create a temp directory (works around Windows pytest-asyncio issues)."""
+    """Create a temp directory, cleaned up after the test."""
     d = Path(tempfile.mkdtemp(prefix="teg_test_"))
     yield d
     shutil.rmtree(d, ignore_errors=True)
