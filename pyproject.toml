@@ -46,4 +46,7 @@ test = ["pytest>=7", "pytest-cov>=4"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short --cov=check_mojibake --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+omit = ["src/check_mojibake/__main__.py"]

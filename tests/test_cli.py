@@ -72,3 +72,66 @@ class TestCliFix:
         main(["--root", str(tmp_dir), "--fix-gbk", "--quiet"])
         # Either fixed (backup exists) or skipped — either is acceptable
         assert target.exists()
+
+    def test_fix_gbk_recovers_and_backs_up(self, tmp_dir: Path, capsys):
+        # Build a genuinely recoverable corruption: clean UTF-8 bytes that were
+        # misread as GB18030. Reversing that (encode gb18030 -> decode utf-8)
+        # restores the original, so --fix-gbk should repair it.
+        clean = "成功欢迎回来数据库连接正常系统运行稳定错误请联系管理员反馈问题数据处理完"
+        corrupted = clean.encode("utf-8").decode("gb18030")
+        assert corrupted != clean  # sanity: the input really is corrupted
+
+        target = tmp_dir / "corrupt.py"
+        target.write_text(corrupted, encoding="utf-8")
+
+        code = main(["--root", str(tmp_dir), "--fix-gbk", "--json"])
+        assert code == 0
+
+        data = json.loads(capsys.readouterr().out)
+        assert str(target) in data["fixed"]
+
+        # File repaired in place and a backup of the original bytes was kept.
+        assert target.read_text(encoding="utf-8") == clean
+        backup = tmp_dir / "corrupt.py.bak.mojibake"
+        assert backup.exists()
+        assert backup.read_text(encoding="utf-8") == corrupted
+
+    def test_fix_gbk_skips_unrecoverable(self, tmp_dir: Path, capsys):
+        # Tang-tun corruption scores low and never recovers below the threshold,
+        # so it must be reported as skipped, not fixed.
+        target = tmp_dir / "bad.py"
+        target.write_text("x = '烫烫烫烫烫'", encoding="utf-8")
+
+        main(["--root", str(tmp_dir), "--fix-gbk", "--json"])
+        data = json.loads(capsys.readouterr().out)
+
+        assert data["fixed"] == []
+        assert str(target) in data["skipped"]
+
+
+class TestCliOutput:
+    def test_decode_error_reported(self, tmp_dir: Path, capsys):
+        # Bytes that are not valid UTF-8 land in decode_errors, not findings.
+        (tmp_dir / "binary.py").write_bytes(b"\xff\xfe\x00\x01bad")
+        main(["--root", str(tmp_dir), "--json"])
+        data = json.loads(capsys.readouterr().out)
+        assert len(data["decode_errors"]) == 1
+
+    def test_text_output_lists_suspicious(self, tmp_dir: Path, capsys):
+        (tmp_dir / "bad.py").write_text("x = '烫烫烫烫烫'", encoding="utf-8")
+        main(["--root", str(tmp_dir)])
+        out = capsys.readouterr().out
+        assert "suspicious" in out
+        assert "bad.py" in out
+
+    def test_text_output_reports_clean(self, tmp_dir: Path, capsys):
+        (tmp_dir / "clean.py").write_text("print('hello world')")
+        main(["--root", str(tmp_dir)])
+        out = capsys.readouterr().out
+        assert "no suspicious mojibake" in out
+
+    def test_text_output_shows_decode_errors(self, tmp_dir: Path, capsys):
+        (tmp_dir / "binary.py").write_bytes(b"\xff\xfe\x00\x01bad")
+        main(["--root", str(tmp_dir)])
+        out = capsys.readouterr().out
+        assert "decode-errors" in out
