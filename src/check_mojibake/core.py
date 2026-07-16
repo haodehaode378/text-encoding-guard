@@ -225,29 +225,21 @@ def preview_lines(text: str, max_chars: int = 180) -> list[str]:
 
 
 def try_gbk_recover(text: str) -> str | None:
-    """Try to reverse common UTF-8-as-GBK corruption.
+    """Try to reverse the common UTF-8-as-GBK corruption.
 
-    Direction 1 (most common): re-encode as gb18030, decode as utf-8.
-    Direction 2 (fallback): try the reverse direction (GBK bytes misread as UTF-8).
+    The dominant corruption seen from AI assistants is: valid UTF-8 bytes
+    decoded as GBK/GB18030 (e.g. "用户" -> "鐢ㄦ埛"). Re-encoding the mangled
+    text back to gb18030 and decoding it as UTF-8 reverses that.
+
+    The caller validates any candidate by re-scoring it, so we only need to
+    surface a plausible reversal here and let scoring reject false positives.
     """
-    # Direction 1: UTF-8 bytes misread as GBK/GB18030
     try:
         recovered = text.encode("gb18030").decode("utf-8")
-        if recovered != text:
-            return recovered
     except (UnicodeEncodeError, UnicodeDecodeError):
-        pass
+        return None
 
-    # Direction 2: GBK bytes misread as UTF-8
-    try:
-        raw = text.encode("utf-8")
-        recovered = raw.decode("gb18030")
-        if recovered != text:
-            return recovered
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        pass
-
-    return None
+    return recovered if recovered != text else None
 
 
 # ---------------------------------------------------------------------------
