@@ -248,6 +248,16 @@ class TestIterFiles:
         files = list(iter_files(tmp_dir, {".py"}))
         assert files == []
 
+    def test_skips_backup_files(self, tmp_dir: Path):
+        # Backups written by --fix-gbk hold the original corrupted bytes and
+        # must never be re-scanned, even when their base extension matches.
+        (tmp_dir / "app.py").write_text("hello")
+        (tmp_dir / "app.py.bak.mojibake").write_text("hello")
+        files = list(iter_files(tmp_dir, {".py"}))
+        names = {f.name for f in files}
+        assert "app.py" in names
+        assert "app.py.bak.mojibake" not in names
+
     def test_skips_symlinks(self, tmp_dir: Path):
         target = tmp_dir / "target.py"
         target.write_text("hello")

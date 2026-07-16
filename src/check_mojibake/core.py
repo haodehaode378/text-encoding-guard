@@ -29,6 +29,12 @@ SKIP_DIRS: set[str] = {
     ".venv", "venv", "target", ".idea", ".vscode", ".claude",
 }
 
+# Suffix appended to backups written by --fix-gbk. These are copies of the
+# original corrupted bytes, so they must never be re-scanned (that would
+# re-report the very corruption we just backed up), even when the user adds
+# custom extensions via --ext.
+BACKUP_SUFFIX = ".bak.mojibake"
+
 # ---------------------------------------------------------------------------
 # Detection patterns
 # ---------------------------------------------------------------------------
@@ -126,6 +132,8 @@ def iter_files(root: Path, exts: set[str]) -> Iterable[Path]:
         if not p.is_file():
             continue
         if any(part in SKIP_DIRS for part in p.parts):
+            continue
+        if p.name.endswith(BACKUP_SUFFIX):
             continue
         if p.suffix.lower() not in exts:
             continue
@@ -308,7 +316,7 @@ def main(argv: list[str] | None = None) -> int:
             if recovered is not None:
                 new_score, _ = score_text(recovered)
                 if new_score <= max(0, old_score // 3) and old_score - new_score >= 8:
-                    bak = fp.with_suffix(fp.suffix + ".bak.mojibake")
+                    bak = fp.with_suffix(fp.suffix + BACKUP_SUFFIX)
                     if not bak.exists():
                         bak.write_bytes(raw)
                     fp.write_text(recovered, encoding="utf-8", newline="")
